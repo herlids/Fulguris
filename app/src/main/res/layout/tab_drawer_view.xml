@@ -89,6 +89,19 @@
             android:onClick="@{(view) -> uiController.executeAction(view.id)}"
             />
 
+        <ImageButton
+            android:id="@+id/action_minimize_tabs"
+            style="?android:attr/actionButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:contentDescription="@string/action_minimize_tabs"
+            app:tooltipText="@{@string/action_minimize_tabs}"
+            android:scaleType="center"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_arrow_left"
+            />
+
     </LinearLayout>
     </com.google.android.material.appbar.AppBarLayout>
 

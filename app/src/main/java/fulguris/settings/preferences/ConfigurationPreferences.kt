@@ -83,6 +83,18 @@ abstract class ConfigurationPreferences constructor(
     var tabBarInDrawer by preferences.booleanPreference(R.string.pref_key_tab_bar_in_drawer, !screenSize.isTablet())
 
     /**
+     * Width in dp of the vertical tab bar when it is shown beside the page rather than in a drawer.
+     * Stored as a float to match the [x.SliderPreference] which persists floats.
+     */
+    var verticalTabWidth by preferences.floatPreference(R.string.pref_key_vertical_tab_width, getDefaultFloat(PrefKeys.VerticalTabWidth))
+
+    /**
+     * True if the always on screen vertical tab bar is currently minimized.
+     * It is then hidden and brought back using the tabs button from the tool bar.
+     */
+    var tabBarMinimized by preferences.booleanPreference(R.string.pref_key_tab_bar_minimized, false)
+
+    /**
      * True if the app should use the navigation drawer UI, false if it should use the traditional
      * desktop browser tabs UI.
      */

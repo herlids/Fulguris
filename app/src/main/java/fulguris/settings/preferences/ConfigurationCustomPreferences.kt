@@ -66,6 +66,7 @@ class ConfigurationCustomPreferences constructor(
             PrefKeys.PullToRefresh to true,
             PrefKeys.ToolbarsBottom to false,
             PrefKeys.DesktopWidth to 200F,
+            PrefKeys.VerticalTabWidth to 240F,
             PrefKeys.UseCutoutArea to true,
             PrefKeys.SystemGestureClearance to 0F,
             // Omitted the following as they have non static default values specified in the base class

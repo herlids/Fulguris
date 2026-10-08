@@ -578,6 +578,8 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
             // useBottomsheets settings could have changed
             addTabsViewToParent()
         }
+        // Tab bar width or minimized state could have changed
+        applyVerticalTabBarLayout()
 
         setupToolBar(aConfig)
         setupBookmarksView()
@@ -1627,8 +1629,7 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
             iBindingToolbarContent.tabsButton.isVisible = true
             iBindingToolbarContent.homeButton.isVisible = false
             iBinding.toolbarInclude.tabBarContainer.isVisible = false
-            iBinding.layoutTabsLeft.isVisible = !tabBarInDrawer && !swapBookmarksAndTabs
-            iBinding.layoutTabsRight.isVisible = !tabBarInDrawer && swapBookmarksAndTabs
+            applyVerticalTabBarLayout()
             //iBinding.leftDrawer.isVisible = tabBarInDrawer
             //iBinding.rightDrawer.isVisible = tabBarInDrawer
         } else {
@@ -1639,6 +1640,36 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
             iBinding.layoutTabsRight.isVisible = false
             //iBinding.leftDrawer.isVisible = true
             //iBinding.rightDrawer.isVisible = true
+        }
+    }
+
+    /**
+     * Apply width and visibility of the vertical tab bar shown beside the page.
+     * It is hidden when in a drawer or when the user minimized it.
+     */
+    private fun applyVerticalTabBarLayout() {
+        if (!verticalTabBar) return
+        val shown = !tabBarInDrawer && !configPrefs.tabBarMinimized
+        val widthPx = (configPrefs.verticalTabWidth * resources.displayMetrics.density).toInt()
+        listOf(iBinding.layoutTabsLeft, iBinding.layoutTabsRight).forEach {
+            if (it.layoutParams.width != widthPx) {
+                it.layoutParams = it.layoutParams.apply { width = widthPx }
+            }
+        }
+        iBinding.layoutTabsLeft.isVisible = shown && !swapBookmarksAndTabs
+        iBinding.layoutTabsRight.isVisible = shown && swapBookmarksAndTabs
+    }
+
+    /**
+     * Minimize or restore the always on screen vertical tab bar.
+     * Once minimized it is brought back using the tabs button from the tool bar.
+     */
+    fun setTabBarMinimized(aMinimized: Boolean) {
+        // Our config prefs listener will also notice, but apply it now so that it feels instant
+        configPrefs.tabBarMinimized = aMinimized
+        applyVerticalTabBarLayout()
+        if (!aMinimized) {
+            mainHandler.postDelayed({ tryScrollToCurrentTab() }, 300)
         }
     }
 
@@ -5475,8 +5506,8 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
         val currentTab = tabsManager.currentTab ?: return
         when (v.id) {
             R.id.home_button -> currentTab.apply { requestFocus(); loadHomePage() }
-            // When not using drawer for tabs that button is used to show webpage menu
-            R.id.tabs_button -> if (configPrefs.tabBarInDrawer) openTabs() else {showMenuWebPage()}
+            // When not using drawer for tabs that button minimizes and restores our tab bar
+            R.id.tabs_button -> if (configPrefs.tabBarInDrawer) openTabs() else {setTabBarMinimized(!configPrefs.tabBarMinimized)}
             R.id.button_reload -> refreshOrStop()
             R.id.button_next -> currentTab.findNext()
             R.id.button_back -> currentTab.findPrevious()

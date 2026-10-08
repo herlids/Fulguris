@@ -64,6 +64,7 @@ object PrefKeys {
     const val PullToRefresh = "pref_key_pull_to_refresh"
     const val TabBarVertical = "pref_key_tab_bar_vertical"
     const val TabBarInDrawer = "pref_key_tab_bar_in_drawer"
+    const val VerticalTabWidth = "pref_key_vertical_tab_width"
     const val ToolbarsBottom = "pref_key_toolbars_bottom"
     const val UseCutoutArea = "pref_key_use_cutout_area"
     const val SystemGestureClearance = "pref_key_system_gesture_clearance"

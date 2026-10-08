@@ -13,6 +13,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -74,6 +75,27 @@ class TabsDrawerView @JvmOverloads constructor(
 
         mItemTouchHelper = ItemTouchHelper(callback)
         mItemTouchHelper?.attachToRecyclerView(iBinding.tabsList)
+
+        // Minimize button only makes sense when our tab bar is always on screen beside the page
+        iBinding.actionMinimizeTabs.isVisible = !context.configPrefs.tabBarInDrawer
+        iBinding.actionMinimizeTabs.setOnClickListener {
+            (webBrowser as WebBrowserActivity).setTabBarMinimized(true)
+        }
+    }
+
+    /**
+     * Drop the less important action buttons when our panel is too narrow to fit them all.
+     */
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w == oldw || w == 0) return
+        val widthDp = w / resources.displayMetrics.density
+        // Changing visibility requests a layout, do it once this layout pass is over
+        post {
+            iBinding.actionCloseAllTabs.isVisible = widthDp >= 280
+            iBinding.actionRestoreAllPages.isVisible = widthDp >= 280
+            iBinding.actionRestorePage.isVisible = widthDp >= 200
+        }
     }
 
     /**

@@ -56,6 +56,25 @@
         tools:defaultValue="true"
         />
 
+    <x.SliderPreference
+        a:key="@string/pref_key_vertical_tab_width"
+        a:title="@string/pref_title_vertical_tab_width"
+        a:summary="@string/pref_summary_vertical_tab_width"
+        a:icon="@drawable/ic_view_quilt_outline"
+        a:seekBarIncrement="10"
+        a:showSeekBarValue="true"
+        a:iconSpaceReserved="false"
+        a:updatesContinuously="true"
+        a:dependency="@string/pref_key_tab_bar_vertical"
+        android:valueFrom="150"
+        android:valueTo="400"
+        android:stepSize="10"
+        android:value="240"
+        a:labelBehavior="gone"
+        a:format="%.0f dp"
+        a:singleLineTitle="false"
+        />
+
     <x.SwitchPreference
         android:key="@string/pref_key_toolbars_bottom"
         android:title="@string/pref_title_toolbars_position"
