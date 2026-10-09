@@ -448,6 +448,11 @@
     <string name="pref_title_vertical_tab_width">Bredde på fanepanel</string>
     <string name="pref_summary_vertical_tab_width">Bredden på det vertikale fanepanelet når det alltid er på skjermen</string>
     <string name="action_minimize_tabs">Minimer fanepanel</string>
+    <string name="pref_title_vertical_tab_height">Fanehøyde</string>
+    <string name="pref_summary_vertical_tab_height">Høyden på hver fane i det vertikale fanepanelet</string>
+    <string name="pref_title_tab_bar_side">Side for fanepanel</string>
+    <string name="pref_summary_on_tab_bar_side">Venstre</string>
+    <string name="pref_summary_off_tab_bar_side">Høyre</string>
     <string name="pref_title_toolbars_position">Verktøylinjeposisjon</string>
     <string name="pref_summary_on_toolbars_position">Bunn</string>
     <string name="pref_summary_off_toolbars_position">Top</string>

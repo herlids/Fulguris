@@ -89,6 +89,17 @@ abstract class ConfigurationPreferences constructor(
     var verticalTabWidth by preferences.floatPreference(R.string.pref_key_vertical_tab_width, getDefaultFloat(PrefKeys.VerticalTabWidth))
 
     /**
+     * Height in dp of each tab in the vertical tab bar. The current tab is slightly taller.
+     * Stored as a float to match the [x.SliderPreference] which persists floats.
+     */
+    var verticalTabHeight by preferences.floatPreference(R.string.pref_key_vertical_tab_height, getDefaultFloat(PrefKeys.VerticalTabHeight))
+
+    /**
+     * True to show the always on screen vertical tab bar on the left of the page, false for the right.
+     */
+    var tabBarOnLeft by preferences.booleanPreference(R.string.pref_key_tab_bar_on_left, false)
+
+    /**
      * True if the always on screen vertical tab bar is currently minimized.
      * It is then hidden and brought back using the tabs button from the tool bar.
      */

@@ -488,6 +488,11 @@
     <string name="pref_title_vertical_tab_width">Tab panel width</string>
     <string name="pref_summary_vertical_tab_width">Width of the vertical tab panel when it is always on screen</string>
     <string name="action_minimize_tabs">Minimize tab panel</string>
+    <string name="pref_title_vertical_tab_height">Tab height</string>
+    <string name="pref_summary_vertical_tab_height">Height of each tab in the vertical tab panel</string>
+    <string name="pref_title_tab_bar_side">Tab panel side</string>
+    <string name="pref_summary_on_tab_bar_side">Left</string>
+    <string name="pref_summary_off_tab_bar_side">Right</string>
     <string name="pref_title_toolbars_position">Toolbars position</string>
     <string name="pref_summary_on_toolbars_position">Bottom</string>
     <string name="pref_summary_off_toolbars_position">Top</string>

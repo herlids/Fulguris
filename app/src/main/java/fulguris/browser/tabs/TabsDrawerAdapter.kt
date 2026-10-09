@@ -2,6 +2,7 @@ package fulguris.browser.tabs
 
 import fulguris.R
 import fulguris.browser.WebBrowser
+import fulguris.di.configPrefs
 import fulguris.extensions.dimen
 import fulguris.extensions.inflater
 import fulguris.extensions.isDarkTheme
@@ -56,7 +57,10 @@ class TabsDrawerAdapter(
             isChecked = isForeground
             // Adjust tab item height depending of foreground state
             val params = layoutParams
-            params.height = context.dimen(if (isForeground) R.dimen.material_grid_touch_xxlarge else R.dimen.material_grid_touch_large)
+            // Tab height is user defined, the current tab keeps its usual extra height
+            val tabHeight = (context.configPrefs.verticalTabHeight * resources.displayMetrics.density).toInt()
+            val extra = context.dimen(R.dimen.material_grid_touch_xxlarge) - context.dimen(R.dimen.material_grid_touch_large)
+            params.height = if (isForeground) tabHeight + extra else tabHeight
             layoutParams = params
         }
 

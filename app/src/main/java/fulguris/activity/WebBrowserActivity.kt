@@ -185,6 +185,7 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
     private var verticalTabBar: Boolean = false
     private var tabBarInDrawer: Boolean = false
     private var swapBookmarksAndTabs: Boolean = false
+    private var tabHeightApplied: Float = 0F
 
     private var originalOrientation: Int = 0
     private var currentUiColor = Color.BLACK
@@ -578,7 +579,8 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
             // useBottomsheets settings could have changed
             addTabsViewToParent()
         }
-        // Tab bar width or minimized state could have changed
+        // Tab bar side, width or minimized state could have changed
+        addTabsViewToParent()
         applyVerticalTabBarLayout()
 
         setupToolBar(aConfig)
@@ -1629,6 +1631,8 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
             iBindingToolbarContent.tabsButton.isVisible = true
             iBindingToolbarContent.homeButton.isVisible = false
             iBinding.toolbarInclude.tabBarContainer.isVisible = false
+            // A new tabs view binds using the current tab height, no need to rebind it
+            tabHeightApplied = configPrefs.verticalTabHeight
             applyVerticalTabBarLayout()
             //iBinding.leftDrawer.isVisible = tabBarInDrawer
             //iBinding.rightDrawer.isVisible = tabBarInDrawer
@@ -1656,8 +1660,13 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
                 it.layoutParams = it.layoutParams.apply { width = widthPx }
             }
         }
-        iBinding.layoutTabsLeft.isVisible = shown && !swapBookmarksAndTabs
-        iBinding.layoutTabsRight.isVisible = shown && swapBookmarksAndTabs
+        iBinding.layoutTabsLeft.isVisible = shown && configPrefs.tabBarOnLeft
+        iBinding.layoutTabsRight.isVisible = shown && !configPrefs.tabBarOnLeft
+        // Rebind our tabs if their height setting changed
+        if (tabHeightApplied != configPrefs.verticalTabHeight) {
+            tabHeightApplied = configPrefs.verticalTabHeight
+            tabsView?.tabsInitialized()
+        }
     }
 
     /**
@@ -1709,18 +1718,13 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
      */
     private fun getTabBarContainer(): ViewGroup =
             if (verticalTabBar) {
-                if (swapBookmarksAndTabs) {
-                    if (tabBarInDrawer) {
-                        iBinding.rightDrawerContent
-                    } else {
-                        iBinding.layoutTabsRight
-                    }
+                if (!tabBarInDrawer) {
+                    // Always on screen tab bar has its own side setting
+                    if (configPrefs.tabBarOnLeft) iBinding.layoutTabsLeft else iBinding.layoutTabsRight
+                } else if (swapBookmarksAndTabs) {
+                    iBinding.rightDrawerContent
                 } else {
-                    if (tabBarInDrawer) {
-                        iBinding.leftDrawerContent
-                    } else {
-                        iBinding.layoutTabsLeft
-                    }
+                    iBinding.leftDrawerContent
                 }
             } else {
                 iBinding.toolbarInclude.tabBarContainer

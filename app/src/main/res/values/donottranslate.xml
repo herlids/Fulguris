@@ -46,6 +46,8 @@
     <string name="pref_key_tab_bar_in_drawer">pref_key_tab_bar_in_drawer</string>
     <string name="pref_key_vertical_tab_width">pref_key_vertical_tab_width</string>
     <string name="pref_key_tab_bar_minimized">pref_key_tab_bar_minimized</string>
+    <string name="pref_key_vertical_tab_height">pref_key_vertical_tab_height</string>
+    <string name="pref_key_tab_bar_on_left">pref_key_tab_bar_on_left</string>
     <string name="pref_key_toolbars_bottom">pref_key_toolbars_bottom</string>
     <string name="pref_key_cutout_mode">pref_key_cutout_mode</string>
     <string name="pref_key_use_cutout_area">pref_key_use_cutout_area</string>

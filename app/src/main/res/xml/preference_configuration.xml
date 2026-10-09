@@ -76,6 +76,37 @@
         />
 
     <x.SwitchPreference
+        android:key="@string/pref_key_tab_bar_on_left"
+        android:title="@string/pref_title_tab_bar_side"
+        android:summaryOn="@string/pref_summary_on_tab_bar_side"
+        android:summaryOff="@string/pref_summary_off_tab_bar_side"
+        a:icon="@drawable/ic_view_quilt_outline"
+        a:iconSpaceReserved="false"
+        a:singleLineTitle="false"
+        a:dependency="@string/pref_key_tab_bar_vertical"
+        tools:defaultValue="false"
+        />
+
+    <x.SliderPreference
+        a:key="@string/pref_key_vertical_tab_height"
+        a:title="@string/pref_title_vertical_tab_height"
+        a:summary="@string/pref_summary_vertical_tab_height"
+        a:icon="@drawable/ic_view_quilt_outline"
+        a:seekBarIncrement="4"
+        a:showSeekBarValue="true"
+        a:iconSpaceReserved="false"
+        a:updatesContinuously="true"
+        a:dependency="@string/pref_key_tab_bar_vertical"
+        android:valueFrom="32"
+        android:valueTo="96"
+        android:stepSize="4"
+        android:value="56"
+        a:labelBehavior="gone"
+        a:format="%.0f dp"
+        a:singleLineTitle="false"
+        />
+
+    <x.SwitchPreference
         android:key="@string/pref_key_toolbars_bottom"
         android:title="@string/pref_title_toolbars_position"
         android:summaryOn="@string/pref_summary_on_toolbars_position"

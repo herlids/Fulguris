@@ -1,27 +1,95 @@
 name: Vertical tabs APK
 
+# Builds this fork's vertical tabs changes on top of the latest upstream Fulguris.
+# Runs weekly, on every push to this branch, and on demand.
+# When the DEBUG_KEYSTORE_B64 secret is set the APK is signed with that fixed key and
+# published as a release, so that it can be installed as an update over the previous one.
+
 on:
   workflow_dispatch:
   push:
     branches: [ vertical-tab-width ]
+  schedule:
+    - cron: '17 3 * * 1'
+
+permissions:
+  contents: write
+  actions: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
     steps:
     - uses: actions/checkout@v4
       with:
-        submodules: recursive
+        fetch-depth: 0
+
+    - name: Keep the weekly schedule alive
+      run: gh workflow enable vertical-tabs-apk.yml || true
+
+    - name: Merge latest upstream Fulguris
+      run: |
+        git config user.name "vertical-tabs-build"
+        git config user.email "vertical-tabs-build@users.noreply.github.com"
+        OURS=$(git rev-parse --short=7 HEAD)
+        git fetch https://github.com/Slion/Fulguris.git main
+        THEIRS=$(git rev-parse --short=7 FETCH_HEAD)
+        git merge --no-edit FETCH_HEAD
+        git submodule update --init --recursive
+        echo "TAG=vt-$(date +%Y%m%d)-$THEIRS-$OURS" >> "$GITHUB_ENV"
+        echo "MARK=$THEIRS-$OURS" >> "$GITHUB_ENV"
+
+    - name: Check whether this combination was already released
+      id: check
+      run: |
+        if gh release list --limit 50 --json tagName --jq '.[].tagName' | grep -q -- "-$MARK\$"; then
+          echo "Already released, nothing new to build."
+          echo "skip=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: set up JDK 17
+      if: steps.check.outputs.skip != 'true'
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build installable debug APK
-      run: ./gradlew assembleSlionsFullAgentDebug
+
+    - name: Install fixed signing key
+      if: steps.check.outputs.skip != 'true'
+      run: |
+        if [ -n "$DEBUG_KEYSTORE_B64" ]; then
+          mkdir -p "$HOME/.android"
+          echo "$DEBUG_KEYSTORE_B64" | base64 -d > "$HOME/.android/debug.keystore"
+          echo "Using fixed signing key."
+        else
+          echo "::warning::DEBUG_KEYSTORE_B64 secret is not set, APK gets a throwaway key and no release is published."
+        fi
+
+    - name: Build installable APK
+      if: steps.check.outputs.skip != 'true'
+      run: |
+        chmod +x gradlew
+        ./gradlew assembleSlionsFullAgentDebug
+        APK=$(find app/build/outputs/apk -name '*.apk' | head -n 1)
+        cp "$APK" fulguris-vertical-tabs.apk
+
     - uses: actions/upload-artifact@v4
+      if: steps.check.outputs.skip != 'true'
       with:
         name: fulguris-vertical-tabs
-        path: app/build/outputs/apk/**/*.apk
+        path: fulguris-vertical-tabs.apk
+
+    - name: Publish release
+      if: steps.check.outputs.skip != 'true'
+      run: |
+        if [ -n "$DEBUG_KEYSTORE_B64" ]; then
+          gh release create "$TAG" fulguris-vertical-tabs.apk \
+            --target "$GITHUB_SHA" \
+            --title "Fulguris vertical tabs $TAG" \
+            --notes "Built from upstream Fulguris and this fork's vertical tabs changes ($MARK)."
+        fi
