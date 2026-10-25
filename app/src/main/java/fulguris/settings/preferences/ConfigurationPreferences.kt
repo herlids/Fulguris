@@ -95,6 +95,12 @@ abstract class ConfigurationPreferences constructor(
     var verticalTabHeight by preferences.floatPreference(R.string.pref_key_vertical_tab_height, getDefaultFloat(PrefKeys.VerticalTabHeight))
 
     /**
+     * True if web pages should use desktop mode in this configuration, unless a domain says otherwise.
+     * Typically on in landscape and off in portrait.
+     */
+    var desktopModeDefault by preferences.booleanPreference(R.string.pref_key_config_desktop_mode, getDefaultBoolean(PrefKeys.DesktopModeDefault))
+
+    /**
      * True to show the always on screen vertical tab bar on the left of the page, false for the right.
      */
     var tabBarOnLeft by preferences.booleanPreference(R.string.pref_key_tab_bar_on_left, false)

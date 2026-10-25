@@ -219,6 +219,11 @@ class WebPageTab(
                     // Discard tab initializer since we just consumed it
                     latentTabInitializer = null
                 }
+                // Desktop mode changed while we were in the background, reload with the proper user agent
+                if (reloadWhenForeground) {
+                    reloadWhenForeground = false
+                    reload()
+                }
             } else {
                 // A tab sent to the background is not so new anymore
                 iIntent = null
@@ -269,6 +274,11 @@ class WebPageTab(
      *
      */
     var desktopModeBypassDomainSettings = false
+
+    /**
+     * True if this tab should reload next time it goes to the foreground.
+     */
+    var reloadWhenForeground = false
 
     /**
      * Get our find in page search query.
@@ -434,7 +444,7 @@ class WebPageTab(
             //TODO: it looks like our special URLs don't get frozen for some reason
             createWebView()
             initializeContent(tabInitializer)
-            desktopMode = defaultDomainSettings.desktopMode
+            desktopMode = defaultDomainSettings.desktopModeFor(activity.configPrefs.desktopModeDefault)
             darkMode = defaultDomainSettings.darkMode
         } else {
             // Our WebView will only be created whenever our tab goes to the foreground

@@ -143,6 +143,16 @@ class DomainPreferences constructor(
     }
 
     /**
+     * Desktop mode taking the current screen configuration into account.
+     * A domain explicitly overriding desktop mode wins, otherwise desktop mode is on if either
+     * the default domain settings or the current configuration [aConfigDefault] asks for it.
+     */
+    fun desktopModeFor(aConfigDefault: Boolean): Boolean {
+        if (!isDefault && desktopModeOverride) return desktopModeLocal
+        return parent?.desktopModeFor(aConfigDefault) ?: (desktopModeLocal || aConfigDefault)
+    }
+
+    /**
      * True if dark mode should be enabled by default for this domain, false otherwise.
      */
     var darkModeOverride by preferences.booleanPreference(R.string.pref_key_dark_mode_override, false)

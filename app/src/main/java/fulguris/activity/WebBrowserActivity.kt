@@ -118,6 +118,7 @@ import fulguris.settings.fragment.DisplaySettingsFragment.Companion.MIN_BROWSER_
 import fulguris.settings.fragment.OptionsSettingsFragment
 import fulguris.settings.fragment.SponsorshipSettingsFragment
 import fulguris.settings.preferences.ConfigurationCustomPreferences
+import fulguris.settings.preferences.DomainPreferences
 import fulguris.ssl.SslState
 import fulguris.ssl.createSslDrawableForState
 import fulguris.ssl.showSslDialog
@@ -186,6 +187,7 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
     private var tabBarInDrawer: Boolean = false
     private var swapBookmarksAndTabs: Boolean = false
     private var tabHeightApplied: Float = 0F
+    private var desktopModeApplied: Boolean? = null
 
     private var originalOrientation: Int = 0
     private var currentUiColor = Color.BLACK
@@ -558,6 +560,8 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
     private fun updateConfigurationSharedPreferences() {
         //
         updateConfigPrefs()
+        // Remember which desktop mode our configuration started with
+        if (desktopModeApplied == null) desktopModeApplied = configPrefs.desktopModeDefault
         // I reckon that should prevent accumulating listeners
         // Single unneeded notifications should not impact performance and functionality
         configPrefs.preferences.unregisterOnSharedPreferenceChangeListener(configPrefsListener)
@@ -1666,6 +1670,34 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
         if (tabHeightApplied != configPrefs.verticalTabHeight) {
             tabHeightApplied = configPrefs.verticalTabHeight
             tabsView?.tabsInitialized()
+        }
+    }
+
+    /**
+     * Switch our tabs between desktop and mobile mode when the screen configuration asks for it,
+     * typically when rotating between landscape and portrait.
+     * The current tab reloads right away, other tabs reload when they are next shown.
+     */
+    private fun applyConfigurationDesktopMode() {
+        val configDesktop = configPrefs.desktopModeDefault
+        val previous = desktopModeApplied
+        desktopModeApplied = configDesktop
+        // Nothing to do on first run or if this configuration uses the same mode
+        if (previous == null || previous == configDesktop) return
+        val current = tabsManager.currentTab
+        tabsManager.allTabs.forEach { tab ->
+            // Rotation takes over any manual desktop mode toggle
+            tab.desktopModeBypassDomainSettings = false
+            val host = try { Uri.parse(tab.url).host ?: "" } catch (ex: Exception) { "" }
+            val desktop = DomainPreferences(this, host).desktopModeFor(configDesktop)
+            if (tab.desktopMode != desktop) {
+                tab.desktopMode = desktop
+                if (tab == current) {
+                    tab.reload()
+                } else {
+                    tab.reloadWhenForeground = true
+                }
+            }
         }
     }
 
@@ -3806,6 +3838,7 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
     override fun onConfigurationChanged(aNewConfig: Configuration) {
         Timber.d("onConfigurationChanged - $configId")
         updateConfigurationSharedPreferences()
+        applyConfigurationDesktopMode()
 
         super.onConfigurationChanged(aNewConfig)
 
@@ -4186,6 +4219,8 @@ abstract class WebBrowserActivity : ThemedBrowserActivity(),
      */
     override fun onResume() {
         updateConfigurationSharedPreferences()
+        // Desktop mode setting may have been changed from our settings screen
+        applyConfigurationDesktopMode()
         super.onResume()
         Timber.d("onResume")
         // Check if some settings changes require application restart

@@ -514,7 +514,7 @@ class WebPageClient(
 
             // Only apply domain settings desktop mode if no bypass
             if (!desktopModeBypassDomainSettings) {
-                desktopMode = domainPreferences.desktopMode
+                desktopMode = domainPreferences.desktopModeFor(view.context.configPrefs.desktopModeDefault)
             }
 
             // JavaScript

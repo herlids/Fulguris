@@ -34,6 +34,16 @@
         tools:ignore="PrivateResource" />
 
     <x.SwitchPreference
+        android:key="@string/pref_key_config_desktop_mode"
+        android:title="@string/pref_title_config_desktop_mode"
+        android:summaryOn="@string/pref_summary_on_config_desktop_mode"
+        android:summaryOff="@string/pref_summary_off_config_desktop_mode"
+        a:icon="@drawable/ic_desktop"
+        a:iconSpaceReserved="false"
+        a:singleLineTitle="false"
+        />
+
+    <x.SwitchPreference
         android:key="@string/pref_key_tab_bar_vertical"
         android:title="@string/pref_title_tab_bar_orientation"
         android:summaryOn="@string/pref_summary_on_tab_bar_orientation"

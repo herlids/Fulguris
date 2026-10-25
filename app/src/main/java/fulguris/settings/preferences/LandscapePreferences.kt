@@ -68,6 +68,7 @@ class LandscapePreferences @Inject constructor(
             PrefKeys.DesktopWidth to 200F,
             PrefKeys.VerticalTabWidth to 240F,
             PrefKeys.VerticalTabHeight to 56F,
+            PrefKeys.DesktopModeDefault to true,
             PrefKeys.UseCutoutArea to true,
             PrefKeys.SystemGestureClearance to 0F,
             // Omitted the following as they have non static default values specified in the base class
