@@ -22,6 +22,8 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+      # Fingerprint of the fixed signing key, every published APK must match it
+      EXPECTED_CERT_SHA256: cbd06a4670f985b98107a7c9584bc6f74c191a48889ac8f6f854686fc862d5fd
     steps:
     - uses: actions/checkout@v4
       with:
@@ -63,8 +65,11 @@ jobs:
       if: steps.check.outputs.skip != 'true'
       run: |
         if [ -n "$DEBUG_KEYSTORE_B64" ]; then
-          mkdir -p "$HOME/.android"
-          echo "$DEBUG_KEYSTORE_B64" | base64 -d > "$HOME/.android/debug.keystore"
+          # Pin the location Gradle reads its debug key from, whatever the runner image defaults to
+          KEYDIR="$HOME/.android"
+          mkdir -p "$KEYDIR"
+          echo "$DEBUG_KEYSTORE_B64" | base64 -d > "$KEYDIR/debug.keystore"
+          echo "ANDROID_USER_HOME=$KEYDIR" >> "$GITHUB_ENV"
           echo "Using fixed signing key."
         else
           echo "::warning::DEBUG_KEYSTORE_B64 secret is not set, APK gets a throwaway key and no release is published."
@@ -77,6 +82,19 @@ jobs:
         ./gradlew assembleSlionsFullAgentDebug
         APK=$(find app/build/outputs/apk -name '*.apk' | head -n 1)
         cp "$APK" fulguris-vertical-tabs.apk
+
+    - name: Check the APK is signed with the fixed key
+      if: steps.check.outputs.skip != 'true' && env.DEBUG_KEYSTORE_B64 != ''
+      run: |
+        APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -n 1)
+        "$APKSIGNER" verify --print-certs fulguris-vertical-tabs.apk | tee certs.txt
+        ACTUAL=$(grep -m1 "certificate SHA-256 digest" certs.txt | awk '{print $NF}')
+        echo "Expected $EXPECTED_CERT_SHA256"
+        echo "Actual   $ACTUAL"
+        if [ "$ACTUAL" != "$EXPECTED_CERT_SHA256" ]; then
+          echo "::error::APK is not signed with the fixed key, refusing to publish it."
+          exit 1
+        fi
 
     - uses: actions/upload-artifact@v4
       if: steps.check.outputs.skip != 'true'
